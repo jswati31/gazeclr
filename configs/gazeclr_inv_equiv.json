@@ -1,0 +1,8 @@
+{
+    "model": "gazeclrinvequiv",
+    "temperature": 0.1,
+    "face_size": [128, 128],
+    "out_dim": 180,
+    "projection_dim": 512
+
+}

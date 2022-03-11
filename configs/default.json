@@ -1,0 +1,17 @@
+{
+
+    "datasrc_eve": "/path/to/eve/dataset",
+
+    "train_cameras":["basler", "webcam_l", "webcam_c", "webcam_r"],
+    "train_stimuli": ["image", "video", "wikipedia"],
+    "test_cameras": ["basler", "webcam_l", "webcam_c", "webcam_r"],
+    "test_stimuli": ["image", "video", "wikipedia"],
+    "max_sequence_len": 1,
+    "assumed_frame_rate": 10,
+    "load_full_frame_for_visualization": false,
+    "load_screen_content": false,
+
+    "test_num_samples": 50,
+    "test_batch_size": 64
+
+}
