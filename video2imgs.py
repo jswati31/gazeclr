@@ -10,7 +10,7 @@ from tqdm import tqdm
 with open('segmentation_cache/10Hz_seqlen1.pkl', 'rb') as f:
     sequence_segmentations = pickle.load(f)
 
-path = "/path/to/eve/dataset"
+path = "/path/to/eve/dataset"       # ADD data path
 
 output_save_path = os.path.join(path, 'images_face')
 
