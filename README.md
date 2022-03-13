@@ -26,13 +26,13 @@ python video2imgs.py
 GazeCLR (Equiv)
 
 ```
-python main.py --config_json configs/gazeclr.json --save_path <path/to/save> --is_load_label --same_person --transforms 
+python main.py --config_json configs/gazeclr.json --save_path <path/to/save> --is_load_label --same_person
 ```
 
 GazeCLR (Inv+Equiv)
 
 ```
-python main.py --config_json configs/gazeclr_inv_equiv.json --save_path <path/to/save> --is_load_label --same_person --transforms 
+python main.py --config_json configs/gazeclr_inv_equiv.json --save_path <path/to/save> --is_load_label --same_person
 ```
 
 ## Pre-trained Models

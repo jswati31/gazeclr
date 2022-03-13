@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
-
+from losses.contrastive_loss import ContrastiveLoss
 
 class BaseSimCLRException(Exception):
     """Base exception"""
@@ -111,39 +111,7 @@ class TrainGazeCLR(object):
         if torch.cuda.device_count() > 1:
             self.model = torch.nn.DataParallel(self.model)
 
-        self.criterion = torch.nn.CrossEntropyLoss().to(device)
-
-    def info_nce_loss(self, features, views, bsize):
-
-        labels = torch.cat([torch.arange(bsize) for i in range(views)], dim=0)
-        labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
-        labels = labels.to(self.device)
-
-        features = F.normalize(features, dim=1)
-
-        similarity_matrix = torch.matmul(features, features.T)
-        # assert similarity_matrix.shape == (views * b, views * b)
-        assert similarity_matrix.shape == labels.shape
-
-        # discard the main diagonal from both: labels and similarities matrix
-        mask = torch.eye(labels.shape[0], dtype=torch.bool).to(self.device)
-        labels = labels[~mask].view(labels.shape[0], -1)
-        similarity_matrix = similarity_matrix[~mask].view(similarity_matrix.shape[0], -1)
-        # assert similarity_matrix.shape == labels.shape
-
-        # select and combine multiple positives
-        positives = similarity_matrix[labels.bool()].view(labels.shape[0], -1)
-
-        # select only the negatives
-        negatives = similarity_matrix[~labels.bool()].view(similarity_matrix.shape[0], -1)
-
-        logits = torch.cat([positives, negatives], dim=1)
-        labels = torch.zeros(logits.shape[0], dtype=torch.long).to(self.device)
-
-        logits = logits / self.args.temperature
-
-        loss = self.criterion(logits, labels)
-        return loss
+        self.criterion = ContrastiveLoss(device, temperature=config.temperature)
 
     def compute_losses(self, input_dict):
 
@@ -154,9 +122,15 @@ class TrainGazeCLR(object):
         features = output_dict['feat_proj']
         assert features.size()[1] == self.n_views
 
-        b, n, d = features.shape
+        contrastive_loss = 0
+        count = 0
+        for v1 in range(self.n_views):
+            for v2 in range(v1+1, self.n_views):
 
-        contrastive_loss = self.info_nce_loss(features.view(b*n, d), views=n, bsize=b)
+                _loss = self.criterion(features[:, v1], features[:, v2])
+                contrastive_loss += _loss
+                count += 1
+        contrastive_loss /= count
 
         loss_dict['contrastive_loss'] = contrastive_loss
         loss_dict['total_loss'] = contrastive_loss

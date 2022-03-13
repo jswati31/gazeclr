@@ -10,7 +10,7 @@ from utils.train_utils import init_datasets, get_training_model
 from utils.core_utils import set_logger, save_configs
 from utils.checkpoints_manager import CheckpointsManager
 from datasources.EVEDataset import EVEDatasetTrain, EVEDatasetVal
-from datasources.Augmenter import get_simclr_transformations_list
+from datasources.Augmenter import get_transformations_list
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -35,10 +35,8 @@ def main(config):
         ('eve_val', val_data_class, config.datasrc_eve, config.test_stimuli, config.test_cameras),
     ]
 
-    data_transforms = None
-    if config.transforms:
-        data_transforms = get_simclr_transformations_list(config.eyes_size[0] if config.camera_frame_type == 'eyes'
-                                                          else config.face_size[0])
+    data_transforms = get_transformations_list(config.eyes_size[0] if config.camera_frame_type == 'eyes'
+                                               else config.face_size[0])
 
     train_data, test_data = init_datasets(train_dataset_paths, validation_dataset_paths, config, logger,
                                           num_positives=config.num_positives,
@@ -100,7 +98,6 @@ if __name__ == '__main__':
     parser.add_argument('--num_positives', type=int, default=3, help='number of +ve samples for multi-view learning')
     parser.add_argument('--is_load_label', action='store_true', help='true for loading rotation matrices')
     parser.add_argument('--same_person', action='store_true', help='true if same person batch')
-    parser.add_argument('--transforms', action='store_true', help='true for augmentations')
     parser.add_argument('--camera_frame_type', default="face", type=str, help='type of input')
 
     # training args

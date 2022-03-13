@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from losses.contrastive_loss import ContrastiveLoss
 import torchvision.models as models
 
 
@@ -93,7 +93,6 @@ class GazeCLRInvEq(nn.Module):
         R_relative_cam = data_dict['camera_transformation'][:, :, :3, :3]
         assert len(positive_images.size()) == 5
 
-
         b, n, c, h, w = positive_images.size()
         assert R_inv_gaze.shape == (b, n, 3, 3)
         assert R_relative_cam.shape == (b, n, 3, 3)
@@ -126,39 +125,7 @@ class TrainGazeCLRInvEq(object):
         if torch.cuda.device_count() > 1:
             self.model = torch.nn.DataParallel(self.model)
 
-        self.criterion = torch.nn.CrossEntropyLoss().to(device)
-
-    def info_nce_loss(self, features, views, bsize):
-
-        labels = torch.cat([torch.arange(bsize) for i in range(views)], dim=0)
-        labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
-        labels = labels.to(self.device)
-
-        features = F.normalize(features, dim=1)
-
-        similarity_matrix = torch.matmul(features, features.T)
-        # assert similarity_matrix.shape == (views * b, views * b)
-        assert similarity_matrix.shape == labels.shape
-
-        # discard the main diagonal from both: labels and similarities matrix
-        mask = torch.eye(labels.shape[0], dtype=torch.bool).to(self.device)
-        labels = labels[~mask].view(labels.shape[0], -1)
-        similarity_matrix = similarity_matrix[~mask].view(similarity_matrix.shape[0], -1)
-        # assert similarity_matrix.shape == labels.shape
-
-        # select and combine multiple positives
-        positives = similarity_matrix[labels.bool()].view(labels.shape[0], -1)
-
-        # select only the negatives the negatives
-        negatives = similarity_matrix[~labels.bool()].view(similarity_matrix.shape[0], -1)
-
-        logits = torch.cat([positives, negatives], dim=1)
-        labels = torch.zeros(logits.shape[0], dtype=torch.long).to(self.device)
-
-        logits = logits / self.args.temperature
-
-        loss = self.criterion(logits, labels)
-        return loss
+        self.criterion = ContrastiveLoss(device, temperature=config.temperature)
 
     def compute_losses(self, input_dict):
 
@@ -174,18 +141,29 @@ class TrainGazeCLRInvEq(object):
         assert invariant_features_a.size()[1] == self.n_views
         assert invariant_features_b.size()[1] == self.n_views
 
-        b, n, d = equivariant_features.shape
-
         # equivariant loss
-        equivariant_contrastive_loss = self.info_nce_loss(equivariant_features.view(b*n, d), views=n, bsize=b)
+        equivariant_contrastive_loss = 0
+        count = 0
+        for v1 in range(self.n_views):
+            for v2 in range(v1+1, self.n_views):
+
+                _loss = self.criterion(equivariant_features[:, v1], equivariant_features[:, v2])
+                equivariant_contrastive_loss += _loss
+                count += 1
+        equivariant_contrastive_loss /= count
 
         # invariant loss
-        invar_features = torch.cat((invariant_features_a.view(b*n, d), invariant_features_b.view(b*n, d)), dim=0)
-        invariant_contrastive_loss = self.info_nce_loss(invar_features, views=2, bsize=b*n)
+        invariant_contrastive_loss = 0
+        count = 0
+        for v1 in range(self.n_views):
+            _loss = self.criterion(invariant_features_a[:, v1], invariant_features_b[:, v1])
+            invariant_contrastive_loss += _loss
+            count += 1
+        invariant_contrastive_loss /= count
 
         loss_dict['equivariant_contrastive_loss'] = equivariant_contrastive_loss
         loss_dict['invariant_contrastive_loss'] = invariant_contrastive_loss
-        loss_dict['total_loss'] = invariant_contrastive_loss + self.args.equivariant_lambda*equivariant_contrastive_loss
+        loss_dict['total_loss'] = invariant_contrastive_loss + equivariant_contrastive_loss
 
         return loss_dict, output_dict
 

@@ -58,7 +58,7 @@ class AddGaussianNoise(object):
         return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 
-def get_simclr_transformations_list(size, s=1):
+def get_transformations_list(size, s=1):
     color_jitter = transforms.ColorJitter(0.8 * s, 0.8 * s, 0.8 * s, 0.2 * s)
     data_transforms = transforms.Compose([transforms.ToPILImage(),
                                           transforms.RandomResizedCrop(size=size),
