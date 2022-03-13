@@ -79,7 +79,6 @@ class BaseDataSource(Dataset):
         logger.info('Initialized dataset class for: %s' % self.path)
 
     def build_segmentation_cache(self):
-        """Create support data structure for knowing how to segment (cut up) time sequences."""
         all_folders = sorted([
             d for d in os.listdir(self.path) if os.path.isdir(self.path + '/' + d)
         ])
@@ -101,7 +100,6 @@ class BaseDataSource(Dataset):
                 output_to_cache[folder_name][subfolder] = {}
 
                 # NOTE: We assume that the videos are synchronized and have the same length in time.
-                #       This should be the case for the publicly released EVE dataset.
                 for source in ('screen', 'basler', 'webcam_l', 'webcam_c', 'webcam_r'):
                     current_outputs = []
                     source_path_pre = '%s/%s' % (subfolder_path, source)
