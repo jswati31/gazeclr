@@ -1,9 +1,9 @@
 
 # Contrastive Representation Learning for Gaze Estimation
 
-This repository is the official PyTorch implementation of [GazeCLR]().
+This repository is the official PyTorch implementation of [GazeCLR](https://arxiv.org/abs/2210.13404).
 
-- Accepted at NeurIPS 2022, Gaze Meets ML (Spotlight).
+- Accepted at NeurIPS 2022, Gaze Meets ML (Spotlight)
 - Authors: [Swati Jindal](https://jswati31.github.io/), [Roberto Manduchi](https://users.soe.ucsc.edu/~manduchi/)
 
 
