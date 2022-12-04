@@ -3,7 +3,7 @@
 
 This repository is the official PyTorch implementation of [GazeCLR](https://arxiv.org/abs/2210.13404).
 
-- Accepted at NeurIPS 2022, Gaze Meets ML (**Best Paper Award**, Spotlight)
+- Published at NeurIPS 2022, Gaze Meets ML (**Best Paper Award**, Spotlight)
 - Authors: [Swati Jindal](https://jswati31.github.io/), [Roberto Manduchi](https://users.soe.ucsc.edu/~manduchi/)
 
 
