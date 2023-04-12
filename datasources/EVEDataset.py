@@ -110,8 +110,11 @@ class EVEDataset(BaseDataSource):
             view_labels_sorted_index = np.argsort(view_labels)
 
             entry['view_labels'] = view_labels[view_labels_sorted_index]
-            entry['img_a'] = entry['img_a'][view_labels_sorted_index]
-            entry['inv_a'] = entry['inv_a'][view_labels_sorted_index]
+            for k, v in entry.items():
+                entry[k] = v[view_labels_sorted_index]
+
+            # entry['img_a'] = entry['img_a'][view_labels_sorted_index]
+            # entry['inv_a'] = entry['inv_a'][view_labels_sorted_index]
 
         torch_entry = dict([
             (k, torch.from_numpy(a)) if isinstance(a, np.ndarray) else (k, a)
