@@ -43,8 +43,8 @@ python main.py --config_json configs/gazeclr_inv_equiv.json --save_path <path/to
 
 You can download pretrained models here:
 
-- [GazeCLR (Inv+Equiv)](https://drive.google.com/file/d/10K_AwVH6H_0P77lR0XHl3iDsfiep2YTP/view?usp=sharing)
-- [GazeCLR (Equiv)](https://drive.google.com/file/d/1dx7ZLd0y-EzWW3wUiQC6BFZvCjF82wf8/view?usp=sharing)
+- [GazeCLR (Inv+Equiv)](https://drive.google.com/file/d/17_BdB-mnsZEw33yaqHZxJYX8YLArfcq9/view?usp=sharing)
+- [GazeCLR (Equiv)](https://drive.google.com/file/d/1qGwQnCLkxHitrj1QLhBGDVLfmvEYU0r1/view?usp=sharing)
 
 ## Questions?
 
